@@ -2693,7 +2693,7 @@ end</entry>
             <entry key="AutoNetkit.IGP" type="String">ospf</entry>
             <entry key="static_serial_port_0" type="Integer">5008</entry>
             <entry key="config" type="String">!
-! Last configuration change at 14:47:59 UTC Thu Feb 2 2017
+! Last configuration change at 04:20:05 UTC Fri Feb 3 2017
 !
 version 15.6
 service timestamps debug datetime msec
@@ -2831,7 +2831,7 @@ interface GigabitEthernet0/6
 !
 interface GigabitEthernet0/7
  description to R7
- ip address 78.0.0.8 255.255.255.0
+ ip address 78.0.0.8 255.255.255.240
  ip access-group SECURE in
  ip verify unicast source reachable-via rx
  duplex full
@@ -3203,7 +3203,7 @@ end</entry>
             <entry key="AutoNetkit.IGP" type="String">ospf</entry>
             <entry key="static_serial_port_0" type="Integer">5007</entry>
             <entry key="config" type="String">!
-! Last configuration change at 14:47:43 UTC Thu Feb 2 2017
+! Last configuration change at 04:34:10 UTC Fri Feb 3 2017
 !
 version 15.6
 service timestamps debug datetime msec
@@ -3348,7 +3348,7 @@ interface GigabitEthernet0/7
 !
 interface GigabitEthernet0/8
  description to R8
- ip address 78.0.0.7 255.255.255.0
+ ip address 78.8.0.7 255.255.255.0
  ip verify unicast source reachable-via rx
  duplex full
  speed auto
@@ -3395,6 +3395,7 @@ router bgp 2711
  neighbor internal update-source Loopback0
  neighbor internal timers 5 10
  neighbor external peer-group
+ neighbor external password fishsticks
  neighbor external prefix-list PL-BGP-IN in
  neighbor 5.5.5.5 peer-group internal
  neighbor 78.0.0.8 remote-as 3356
