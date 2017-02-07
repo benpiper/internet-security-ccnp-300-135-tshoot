@@ -1466,7 +1466,7 @@ interface Tunnel19
  ipv6 address 2001:19::1/32
  ipv6 ospf 1 area 1
  tunnel source 1.1.1.1
- tunnel destination 9.9.9.9
+ tunnel mode gre multipoint
 !
 interface GigabitEthernet0/0
  description OOB Management
@@ -1479,6 +1479,7 @@ interface GigabitEthernet0/0
 interface GigabitEthernet0/1
  description to SW2
  ip address 198.51.100.1 255.255.255.248
+ ip access-group 199 in
  ip ospf network broadcast
  duplex full
  speed auto
@@ -1609,8 +1610,11 @@ ip prefix-list PL-OSPF-NEIGHBORS seq 5 permit 157.157.157.0/24
 ipv6 route 2001::9/128 2001::2
 ipv6 route 2001::8/127 2001::2
 ipv6 router ospf 1
+ area 1 filter-list prefix PL-OPT out
 !
 !
+!
+ipv6 prefix-list PL-OPT seq 5 deny 2001:49::/32
 !
 access-list 10 deny   224.0.0.10
 access-list 10 permit any
@@ -1622,6 +1626,9 @@ access-list 50 permit any
 access-list 111 permit ip any any
 access-list 114 permit ip host 198.51.100.1 host 203.0.113.4
 access-list 119 permit ip host 198.51.100.1 host 192.0.1.1
+access-list 199 permit icmp any any
+access-list 199 deny   esp any any
+access-list 199 permit ip any any
 !
 control-plane
 !
@@ -2249,11 +2256,12 @@ interface Tunnel14
 !
 interface Tunnel49
  description Tunnel to R9
- no ip address
+ ip address 172.16.49.4 255.255.255.0
  ipv6 address FE80::4 link-local
  ipv6 address 2001:49::4/32
  ipv6 ospf 1 area 1
  tunnel source 4.4.4.4
+ tunnel mode ipip
  tunnel destination 9.9.9.9
 !
 interface GigabitEthernet0/0
@@ -2324,8 +2332,10 @@ router eigrp 29897
 !
 router ospf 1
  router-id 10.0.0.4
+ area 1 filter-list prefix PL-NO172 out
  redistribute eigrp 29897 subnets
  network 10.0.0.4 0.0.0.0 area 0
+ network 172.16.49.4 0.0.0.0 area 1
  network 192.168.14.4 0.0.0.0 area 0
 !
 router bgp 29897
@@ -2348,15 +2358,20 @@ ip ssh server algorithm authentication password
 !
 !
 ip prefix-list PL-BLOCK seq 5 permit 3.3.3.3/32
+!
+ip prefix-list PL-NO172 seq 5 deny 172.16.49.0/24
 ipv6 route 2001::9/128 2001::1
 ipv6 router eigrp 29897
  redistribute ospf 1 metric 100000000 0 255 1 1500 include-connected
 !
 ipv6 router ospf 1
  router-id 10.0.0.4
- redistribute eigrp 29897 include-connected
+ area 1 filter-list prefix PL-OPT out
+ redistribute eigrp 29897
 !
 !
+!
+ipv6 prefix-list PL-OPT seq 5 deny 2001:49::/32
 route-map RM-BGP-&gt;EIGRP permit 10
  set metric 1000000 1 255 1 1500
 !
@@ -3599,17 +3614,18 @@ interface Loopback1
 !
 interface Tunnel19
  no ip address
+ ipv6 address FE80::9 link-local
  ipv6 address 2001:19::9/32
  ipv6 ospf 1 area 1
- tunnel source 9.9.9.9
  tunnel destination 1.1.1.1
 !
 interface Tunnel49
- no ip address
+ ip address 172.16.49.9 255.255.255.0
  ipv6 address FE80::9 link-local
  ipv6 address 2001:49::9/32
  ipv6 ospf 1 area 1
  tunnel source 9.9.9.9
+ tunnel mode ipip
  tunnel destination 4.4.4.4
 !
 interface GigabitEthernet0/0
@@ -3724,6 +3740,9 @@ interface GigabitEthernet0/14
  media-type rj45
  ipv6 address 2001:6509::1/32
  ipv6 ospf 1 area 1
+!
+router ospf 1
+ network 172.16.49.9 0.0.0.0 area 1
 !
 router bgp 16509
  bgp log-neighbor-changes
